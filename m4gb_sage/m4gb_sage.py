@@ -51,7 +51,7 @@ def check_domains(polyseq, coeff_matrix=False, term_order=None):
     if field.characteristic() > MAX_PRIME:
         raise NotImplementedError("maximum prime field size is %s" % MAX_PRIME)
     
-    if not (term_order in ["Degree reverse lexicographic term order", "Lexicographic term order", "degrevlex", "lex"]):
+    if not (str(term_order) in ["Degree reverse lexicographic term order", "Lexicographic term order", "degrevlex", "lex"]):
         raise NotImplementedError("term order not implemented")
 
 def monomial_from_degree_vector(variables, degree_vector):
@@ -237,7 +237,7 @@ def create_shell_script(file_name, **kwds):
         file.writelines(lines)
     return run_file_path
 
-def groebner_basis(polys, term_order=None, **kwds):
+def groebner_basis(polys, is_matrix=False, ring=None, **kwds):
     r"""
     Compute a Groebner basis of an ideal using M4GB.
     Supported term orders of the underlying polynomial ring are ``degrevlex``, ``lex``.
@@ -247,7 +247,11 @@ def groebner_basis(polys, term_order=None, **kwds):
     INPUT:
     
     - ``polys`` -- an ideal or a polynomial sequence, the generators of an
-      ideal.
+      ideal, or its dense coefficient matrix.
+    
+    - ``is_matrix`` -- is input a dense coefficient matrix, True or False, default: False.
+    
+    - ``ring`` -- polynomial ring, must only be supplied if polys are given as dense coefficient matrix
     
     - ``threads`` -- integer (default: `1`).
       
@@ -270,15 +274,15 @@ def groebner_basis(polys, term_order=None, **kwds):
     kwds.setdefault('threads', 1)
     kwds.setdefault('verbosity', 3)
     
-    try:
-        polyseq = polys[0][0]
-        polyseq = polys
+    if is_matrix:
+        mat = polys
         field = polys.base_ring()
-        if term_order is None:
-            raise NotImplementedError("if polynomial system is given as dense coefficient matrix term order must be supplied")
+        if ring is None:
+            raise NotImplementedError("if polynomial system is given as dense coefficient then polynomial ring must be supplied")
+        term_order = ring.term_order()
         check_domains(polyseq, True, term_order)
         t_mat = -1
-    except:
+    else:
         polyseq = PolynomialSequence(polys)
         check_domains(polyseq)
         ring = polyseq.ring()
