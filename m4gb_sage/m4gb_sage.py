@@ -280,7 +280,7 @@ def groebner_basis(polys, is_matrix=False, ring=None, **kwds):
         if ring is None:
             raise NotImplementedError("if polynomial system is given as dense coefficient then polynomial ring must be supplied")
         term_order = ring.term_order()
-        check_domains(polyseq, True, term_order)
+        check_domains(mat, True, term_order)
         t_mat = -1
     else:
         polyseq = PolynomialSequence(polys)
